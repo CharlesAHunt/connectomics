@@ -1,0 +1,42 @@
+@(registerForm: play.api.data.Form[User])
+
+@import helper._
+
+<div id="register" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="register" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3>Register</h3>
+            </div>
+
+            <div class="modal-body">
+                @form(routes.Access.register()) {
+                    @inputText(
+                        registerForm("username"),
+                        '_label -> "Username",
+                        '_help -> "Please choose a valid username.",
+                        '_error -> registerForm.globalError
+                    )
+
+                    @inputPassword(
+                        registerForm("token"),
+                        '_label -> "Password",
+                        '_help -> "A password must be at least 6 characters. "
+                    )
+
+                    @inputPassword(
+                        registerForm("token"),
+                        '_label -> "Repeat password",
+                        '_help -> "Please repeat your password again.",
+                        '_error -> registerForm.error("token")
+                    )
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <input type="submit" class="btn btn-success" value="Register">
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

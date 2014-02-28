@@ -1,0 +1,11 @@
+@()(implicit flash: play.api.mvc.Flash)
+
+@if(!flash.isEmpty) {
+    @for((msgKey, msgValue) <- flash.data) {
+        <div class="alert alert-@msgKey" data-dismiss="alert">
+            <a title='@Messages("misc.message.close")' style="color:black;" class="close">×</a>
+            @msgKey : @msgValue
+        </div>
+    }
+}
+

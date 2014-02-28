@@ -10,13 +10,13 @@ import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
 import utils.{NeuronMaster, NeuronListener, NeuronCalculate}
 
-object Application extends Controller {
+object Application extends Controller with Access {
 
-  def index = Action {
-    Ok(views.html.index())
+  def index = Action { implicit request =>
+    Ok(views.html.index(loginForm, registerForm))
   }
 
-  def launch() = {
+  def launchNeurons() = Action { implicit request =>
     calculate(nrOfWorkers = 5, nrOfElements = 500, nrOfMessages = 1000)
 
     def calculate(nrOfWorkers: Int, nrOfElements: Int, nrOfMessages: Int) {
@@ -28,10 +28,9 @@ object Application extends Controller {
 
       implicit val timeout = Timeout(5 seconds)
       val future = master ! NeuronCalculate
-
-
-
     }
+
+    Ok(views.html.index(loginForm, registerForm))
 
   }
 

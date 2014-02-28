@@ -1,7 +1,14 @@
-@()
+@(loginForm: play.api.data.Form[User], registerForm: play.api.data.Form[User])(implicit flash: play.api.mvc.Flash, session: play.api.mvc.Session)
 
-@main() {
+@main(loginForm, registerForm) {
 
+<div class="container-fluid">
+    <div class="row">
+        <div class="well">
+            <a href ='./launchNeurons' class="btn btn-primary">Launch Neuron Actor System</a>
+        </div>
+    </div>
+</div>
 
 
 }

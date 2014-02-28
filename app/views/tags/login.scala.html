@@ -1,0 +1,47 @@
+@(loginForm: play.api.data.Form[User])
+
+@import helper._
+@import helper.twitterBootstrap._
+
+<div id="login" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="login" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3>Login</h3>
+            </div>
+
+            <div class="modal-body">
+                @form(routes.Access.login()) {
+                    <fieldset>
+                        @inputText(
+                            loginForm("username"),
+                            '_label -> "Username"
+                        )
+
+                        @inputPassword(
+                            loginForm("token"),
+                            '_label -> "Password"
+                        )
+                    </fieldset>
+
+                    <fieldset style="display: inline; margin-bottom: 10px;">
+                        @checkbox(
+                            loginForm("accept"),
+                            '_label -> None, '_text -> "Remember me",
+                            '_showConstraints -> false
+                        )
+                    </fieldset>
+
+                    <a href="#" style="color: blue;margin-left: 1em;">I forgot my password</a>
+
+                    <div class="modal-footer">
+                        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                        <input type="submit" class="btn btn-large btn-primary" value="Sign In">
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
