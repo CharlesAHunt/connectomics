@@ -4,13 +4,19 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
+import scala.io.Source
 
 object NeuronProcessor {
 
+  val csvIterator = Source.fromFile("C:\\testdata\\test\\fluorescence_test.txt").getLines()
+
   def calculateFor(start: Int, nrOfElements: Int): Double = {
     var acc = 0.0
-    for (i ← start until (start + nrOfElements))
-      acc += i  //some processing might occur here...not sure yet what should happen inside each neuron worker
+    val values = csvIterator.next().split(",")
+    for (i ← 0 until values.size) {
+      values(i)
+      acc += i //some processing might occur here...not sure yet what should happen inside each neuron worker
+    }
     acc
   }
 }
@@ -21,10 +27,10 @@ class NeuronWorker extends Actor {
     case Work(start, nrOfElements) ⇒
       sender ! NeuronResult(NeuronProcessor.calculateFor(start, nrOfElements)) // perform the work
   }
+
 }
 
-class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, nrOfElements: Int, listener: ActorRef)
-  extends Actor {
+class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, nrOfElements: Int, listener: ActorRef) extends Actor {
 
   var numericalResult: Double = _
   var nrOfResults: Int = _
