@@ -8,13 +8,9 @@ import scala.io.Source
 
 object NeuronProcessor {
 
-  val csvIterator = Source.fromFile("C:\\testdata\\test\\fluorescence_test.txt").getLines()
-
   def calculateFor(start: Int, nrOfElements: Int): Double = {
     var acc = 0.0
-    val values = csvIterator.next().split(",")
-    for (i ← 0 until values.size) {
-      values(i)
+    for (i ← 0 until 10) {
       acc += i //some processing might occur here...not sure yet what should happen inside each neuron worker
     }
     acc

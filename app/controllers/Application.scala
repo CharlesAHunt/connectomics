@@ -9,9 +9,6 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
 import utils.{NeuronMaster, NeuronListener, NeuronCalculate}
-import com.github.tototoshi.csv._
-import java.io.File
-import scala.io.Source
 
 object Application extends Controller with Access {
 
@@ -36,5 +33,28 @@ object Application extends Controller with Access {
     Ok(views.html.index(loginForm, registerForm))
 
   }
+
+  def loadNeurons() = Action { implicit request =>
+    DataLoader.loadData()
+    Ok(views.html.index(loginForm, registerForm))
+  }
+
+  def loadRaw() = Action { implicit request =>
+    DataLoader.loadRawTimeSampleData()
+    Ok(views.html.index(loginForm, registerForm))
+  }
+  def integrate() = Action { implicit request =>
+  //todo integrator
+    Ok(views.html.index(loginForm, registerForm))
+  }
+  def crunch() = Action { implicit request =>
+  //todo cruncher
+    Ok(views.html.index(loginForm, registerForm))
+  }
+  def view() = Action { implicit request =>
+  //todo maybe just redirect to a view screen
+    Ok(views.html.index(loginForm, registerForm))
+  }
+
 
 }
