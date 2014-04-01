@@ -23,17 +23,21 @@ object DataLoader {
       println("Data is already loaded. To load fresh drop the collection and retry")
   }
 
+  //Loads each parsed line into the database as a Seq of Strings
   def loadRawTimeSampleData() = {
 
     val timeSeriesIterator = Source.fromFile("C:\\testdata\\test\\fluorescence_test.txt").getLines()
     val zippedTimeSeries : scala.collection.Iterator[Tuple2[String, Int]] = timeSeriesIterator.zipWithIndex
 
-    var timeSampleSeq: Seq[String] = Seq()
-
     zippedTimeSeries.foreach { timeSeriesLine =>
-        timeSampleSeq = timeSampleSeq :+ timeSeriesLine._1
+        var timeSampleSeq: Seq[String] = Seq()
+        timeSeriesLine._1.split(",").foreach { elem =>
+          timeSampleSeq = timeSampleSeq :+ elem
+        }
         val rawTimeSample = RawTimeSample(index = timeSeriesLine._2, timeSamples = timeSampleSeq)
         RawTimeSampleDAO.insert(rawTimeSample)
     }
+
+    println("Raw time sample data inserted successfully")
   }
 }
