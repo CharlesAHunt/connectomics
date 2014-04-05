@@ -44,7 +44,7 @@ object Application extends Controller with Access {
     Ok(views.html.index(loginForm, registerForm))
   }
   def integrate() = Action { implicit request =>
-  //todo integrator
+    DataLoader.integrateRawTimeSampleData()
     Ok(views.html.index(loginForm, registerForm))
   }
   def crunch() = Action { implicit request =>

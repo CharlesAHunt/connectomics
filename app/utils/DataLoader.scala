@@ -1,6 +1,10 @@
 package utils
 
 import scala.io.Source
+import com.mongodb.casbah.Imports._
+import com.novus.salat._
+import com.novus.salat.annotations._
+import com.novus.salat.global._
 import models.{RawTimeSampleDAO, RawTimeSample, NeuronDAO, Neuron}
 
 object DataLoader {
@@ -26,6 +30,8 @@ object DataLoader {
   //Loads each parsed line into the database as a Seq of Strings
   def loadRawTimeSampleData() = {
 
+    println("Preparing to load raw time sample data...")
+
     val timeSeriesIterator = Source.fromFile("C:\\testdata\\test\\fluorescence_test.txt").getLines()
     val zippedTimeSeries : scala.collection.Iterator[Tuple2[String, Int]] = timeSeriesIterator.zipWithIndex
 
@@ -39,5 +45,26 @@ object DataLoader {
     }
 
     println("Raw time sample data inserted successfully")
+  }
+
+  //integrates the time sample data into the neuron objects
+  def integrateRawTimeSampleData() = {
+
+    println("Preparing to integrate raw time sample data...")
+
+    var index:Int = 0
+
+    DatabaseService.getCollection("neurons").find().foreach { neuron =>
+      val neu = grater[Neuron].asObject(neuron)
+      DatabaseService.getCollection("rawTimeSamples").find().foreach { sample =>
+        val samp = grater[RawTimeSample].asObject(samp)
+        neu.timeSample :+ samp.timeSamples(index)
+      }
+      index = index + 1
+      NeuronDAO.remove(neuron)
+      NeuronDAO.insert(neu)
+    }
+
+    println("Raw time sample data integrated successfully")
   }
 }
