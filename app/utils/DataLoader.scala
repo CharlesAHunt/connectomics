@@ -57,7 +57,7 @@ object DataLoader {
     DatabaseService.getCollection("neurons").find().foreach { neuron =>
       val neu = grater[Neuron].asObject(neuron)
       DatabaseService.getCollection("rawTimeSamples").find().foreach { sample =>
-        val samp = grater[RawTimeSample].asObject(samp)
+        val samp = grater[RawTimeSample].asObject(sample)
         neu.timeSample :+ samp.timeSamples(index)
       }
       index = index + 1
