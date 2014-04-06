@@ -12,7 +12,7 @@ object DataLoader {
   def loadData() = {
 
     if( NeuronDAO.collection.size == 0) {
-      val positionsIterator = Source.fromFile("C:\\testdata\\test\\networkPositions_test.txt").getLines()
+      val positionsIterator = Source.fromFile("public\\connectdata\\test\\networkPositions_test.txt").getLines()
       val zippedPositions : scala.collection.Iterator[scala.Tuple2[String, scala.Int]] = positionsIterator.zipWithIndex
 
       zippedPositions.foreach { position =>
@@ -31,17 +31,16 @@ object DataLoader {
   def loadRawTimeSampleData() = {
 
     println("Preparing to load raw time sample data...")
-
-    val timeSeriesIterator = Source.fromFile("C:\\testdata\\test\\fluorescence_test.txt").getLines()
+    val timeSeriesIterator = Source.fromFile("public\\connectdata\\test\\fluorescence_test.txt").getLines()
     val zippedTimeSeries : scala.collection.Iterator[Tuple2[String, Int]] = timeSeriesIterator.zipWithIndex
 
     zippedTimeSeries.foreach { timeSeriesLine =>
-        var timeSampleSeq: Seq[String] = Seq()
-        timeSeriesLine._1.split(",").foreach { elem =>
-          timeSampleSeq = timeSampleSeq :+ elem
-        }
-        val rawTimeSample = RawTimeSample(index = timeSeriesLine._2, timeSamples = timeSampleSeq)
-        RawTimeSampleDAO.insert(rawTimeSample)
+      var timeSampleSeq: Seq[String] = Seq()
+      timeSeriesLine._1.split(",").foreach { elem =>
+        timeSampleSeq = timeSampleSeq :+ elem
+      }
+      val rawTimeSample = RawTimeSample(index = timeSeriesLine._2, timeSamples = timeSampleSeq)
+      RawTimeSampleDAO.insert(rawTimeSample)
     }
 
     println("Raw time sample data inserted successfully")
