@@ -17,7 +17,7 @@ object DataLoader {
 
       zippedPositions.foreach { position =>
         val positions = position._1.split(",")
-        val neuron = Neuron(index = position._2 ,xPos = positions(0), yPos = positions(1), timeSample = Seq())
+        val neuron = Neuron(index = position._2 ,xPos = positions(0), yPos = positions(1), isOld = true, timeSample = Seq())
         NeuronDAO.insert(neuron)
       }
 
@@ -52,16 +52,19 @@ object DataLoader {
     println("Preparing to integrate raw time sample data...")
 
     var index:Int = 0
+    val allNeurons = NeuronDAO.find(ref = MongoDBObject())
 
-    DatabaseService.getCollection("neurons").find().foreach { neuron =>
-      val neu = grater[Neuron].asObject(neuron)
-      DatabaseService.getCollection("rawTimeSamples").find().foreach { sample =>
-        val samp = grater[RawTimeSample].asObject(sample)
-        neu.timeSample :+ samp.timeSamples(index)
+    allNeurons.foreach { neuron =>
+      var timeSampleSeq: Seq[String] = Seq()
+
+      RawTimeSampleDAO.find(ref = MongoDBObject()).foreach { sample =>
+        timeSampleSeq = timeSampleSeq :+ sample.timeSamples(index)
       }
+
+      val newNeuron = Neuron(index = neuron.index, xPos = neuron.xPos, yPos = neuron.yPos, isOld = false, timeSample = timeSampleSeq)
+      NeuronDAO.insert(newNeuron)
       index = index + 1
-      NeuronDAO.remove(neuron)
-      NeuronDAO.insert(neu)
+      println("Neuron integrated:" + index)
     }
 
     println("Raw time sample data integrated successfully")

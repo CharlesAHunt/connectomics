@@ -9,6 +9,7 @@ case class Neuron (  _id: ObjectId = new ObjectId,
                    index: Int,
                    xPos: String,
                    yPos: String,
+                   isOld: Boolean,
                    timeSample: Seq[String]
                   )
 
