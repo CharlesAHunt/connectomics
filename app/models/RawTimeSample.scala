@@ -7,7 +7,7 @@ import utils.LogicContext._
 
 case class RawTimeSample (  _id: ObjectId = new ObjectId,
                      index: Int,
-                     timeSamples: Seq[String]
+                     timeSamples: Seq[Float]
                     )
 
 object RawTimeSampleDAO extends SalatDAO[RawTimeSample, ObjectId] (

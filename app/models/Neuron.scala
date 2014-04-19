@@ -7,9 +7,9 @@ import utils.LogicContext._
 
 case class Neuron (  _id: ObjectId = new ObjectId,
                    index: Int,
-                   xPos: String,
-                   yPos: String,
-                   timeSample: Seq[String]
+                   xPos: Float,
+                   yPos: Float,
+                   timeSample: Seq[Float]
                   )
 
 object NeuronDAO extends SalatDAO[Neuron, ObjectId] (

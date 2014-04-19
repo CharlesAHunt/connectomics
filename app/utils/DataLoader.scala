@@ -19,7 +19,7 @@ object DataLoader {
       zippedPositions.foreach {
         position =>
           val positions = position._1.split(",")
-          val neuron = Neuron(index = position._2, xPos = positions(0), yPos = positions(1), timeSample = Seq())
+          val neuron = Neuron(index = position._2, xPos = positions(0).toFloat, yPos = positions(1).toFloat, timeSample = Seq())
           NeuronDAO.insert(neuron)
       }
       NeuronDAO.collection.ensureIndex("index")
@@ -37,10 +37,10 @@ object DataLoader {
 
     zippedTimeSeries.foreach {
       timeSeriesLine =>
-        var timeSampleSeq: Seq[String] = Seq()
+        var timeSampleSeq: Seq[Float] = Seq()
         timeSeriesLine._1.split(",").foreach {
           elem =>
-            timeSampleSeq = timeSampleSeq :+ elem
+            timeSampleSeq = timeSampleSeq :+ elem.toFloat
         }
         val rawTimeSample = RawTimeSample(index = timeSeriesLine._2, timeSamples = timeSampleSeq)
         RawTimeSampleDAO.insert(rawTimeSample)
@@ -56,6 +56,7 @@ object DataLoader {
     val chunkSize = 3000
     var isMore = true
     RawTimeSampleDAO.collection.ensureIndex("index")
+
     while(isMore) {
       println(((start/185500.0)*100.0).toInt + "% complete")
       isMore = sliceAndIntegrate(start, start + chunkSize)
@@ -68,7 +69,7 @@ object DataLoader {
   def sliceAndIntegrate(start : Int, chunkSize : Int): Boolean = {
     val allNeurons = NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1))
     val allTimeSamples = RawTimeSampleDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1))
-    var sampleBuffer: Seq[Seq[String]] = Seq()
+    var sampleBuffer: Seq[Seq[Float]] = Seq()
     var indexCheck = -1
 
     allTimeSamples.slice(start, chunkSize).foreach {
@@ -88,8 +89,8 @@ object DataLoader {
 
     allNeurons.foreach {
       neuron =>
-        var nextBuffer: Seq[Seq[String]] = Seq()
-        var currentList: Seq[String] = Seq()
+        var nextBuffer: Seq[Seq[Float]] = Seq()
+        var currentList: Seq[Float] = Seq()
 
         if(indexCheck != -1 && indexCheck+1 != neuron.index) {
           val ind = indexCheck+1
@@ -98,7 +99,7 @@ object DataLoader {
         indexCheck = neuron.index
 
         sampleBuffer.foreach {
-          sample: Seq[String] =>
+          sample: Seq[Float] =>
             if (!sample.isEmpty) {
               currentList = currentList :+ sample.head
               nextBuffer = nextBuffer :+ sample.tail
