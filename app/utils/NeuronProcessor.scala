@@ -4,21 +4,26 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
-import models.{RawTimeSampleDAO, Neuron, NeuronDAO}
+import models.{RawTimeSample, RawTimeSampleDAO, Neuron, NeuronDAO}
 import com.mongodb.casbah.Imports._
 
 object NeuronProcessor {
 
   val allTimeSamples = RawTimeSampleDAO.find(ref = MongoDBObject())
 
-  def calculateFor(start: Int, neuron : Neuron): Double = {
-    var accumulator = 0.0
+  def calculateFor(neuronIndex: Int, neuron : Neuron): Float = {
+    var accumulator : Float = 0
 
-    accumulator += neuron.xPos
-    
-    allTimeSamples.find(x => x.index==1)
+    allTimeSamples.foreach { sample =>
+      accumulator += sample.timeSamples(neuronIndex)
+    }
+
+    accumulator = accumulator/allTimeSamples.size
+
+    println("calced neuron " + neuronIndex)
 
     accumulator
+
   }
 }
 
@@ -33,7 +38,7 @@ class NeuronWorker extends Actor {
 
 class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, listener: ActorRef) extends Actor {
 
-  var numericalResult: Double = _
+  var averageFluorList: List[Float] = List()
   var nrOfResults: Int = _
   val start: Long = System.currentTimeMillis
   val allNeurons = NeuronDAO.find(ref = MongoDBObject())
@@ -46,12 +51,14 @@ class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, listener: ActorRef) exte
       for (i ← 0 until nrOfMessages) workerRouter ! Work(i, allNeurons.next())
 
     case NeuronResult(value) ⇒
-      numericalResult += value
+      averageFluorList :+ value
       nrOfResults += 1
       if (nrOfResults == nrOfMessages) {
 
+        averageFluorList.foreach(x=>print(x+", "))
+
         // Send the result to the listener
-        listener ! NeuronApproximation(numericalResult, duration = (System.currentTimeMillis - start).millis)
+        listener ! NeuronApproximation(0, duration = (System.currentTimeMillis - start).millis)
 
         // Stops this actor and all its supervised children
         context.stop(self)
