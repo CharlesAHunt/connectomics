@@ -4,23 +4,21 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
-import models.{RawTimeSample, RawTimeSampleDAO, Neuron, NeuronDAO}
+import models.{RawTimeSampleDAO, Neuron, NeuronDAO}
 import com.mongodb.casbah.Imports._
 
 object NeuronProcessor {
 
-  val allTimeSamples = RawTimeSampleDAO.find(ref = MongoDBObject())
-
-  def calculateFor(neuronIndex: Int, neuron : Neuron): Float = {
+  def calculateFor(neuronIndex: Int, neuron : Neuron, timeSamples : Seq[Seq[Float]]): Float = {
     var accumulator : Float = 0
 
-    allTimeSamples.foreach { sample =>
-      accumulator += sample.timeSamples(neuronIndex)
+    timeSamples.foreach { sample =>
+      accumulator += sample(neuronIndex)
     }
 
-    accumulator = accumulator/allTimeSamples.size
+    accumulator = accumulator/timeSamples.size
 
-    println("calced neuron " + neuronIndex)
+    println("calced neuron " + accumulator)
 
     accumulator
 
@@ -30,8 +28,8 @@ object NeuronProcessor {
 class NeuronWorker extends Actor {
 
   def receive = {
-    case Work(start, neuron) ⇒
-      sender ! NeuronResult(NeuronProcessor.calculateFor(start, neuron))
+    case Work(start, neuron, timeSamples) ⇒
+      sender ! NeuronResult(NeuronProcessor.calculateFor(start, neuron, timeSamples))
   }
 
 }
@@ -42,13 +40,14 @@ class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, listener: ActorRef) exte
   var nrOfResults: Int = _
   val start: Long = System.currentTimeMillis
   val allNeurons = NeuronDAO.find(ref = MongoDBObject())
+  val allTimeSamples = RawTimeSampleDAO.find(ref = MongoDBObject())
 
   val workerRouter = context.actorOf(
     Props[NeuronWorker].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workerRouter")
 
   def receive = {
     case NeuronCalculate ⇒
-      for (i ← 0 until nrOfMessages) workerRouter ! Work(i, allNeurons.next())
+      for (i ← 0 until nrOfMessages) workerRouter ! Work(i, allNeurons.next(), Seq())
 
     case NeuronResult(value) ⇒
       averageFluorList :+ value
@@ -78,6 +77,6 @@ class NeuronListener extends Actor {
 
 sealed trait NeuronMessage
 case object NeuronCalculate extends NeuronMessage
-case class Work(start: Int, neuron : Neuron) extends NeuronMessage
+case class Work(start: Int, neuron : Neuron, timeSamples : Seq[Seq[Float]]) extends NeuronMessage
 case class NeuronResult(value: Double) extends NeuronMessage
 case class NeuronApproximation(numericalResult: Double, duration: Duration)
