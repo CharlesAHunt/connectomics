@@ -4,7 +4,7 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
-import models.{RawTimeSampleDAO, Neuron, NeuronDAO}
+import models.{RawTimeSample, RawTimeSampleDAO, Neuron, NeuronDAO}
 import com.mongodb.casbah.Imports._
 
 object NeuronProcessor {
@@ -47,7 +47,12 @@ class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, listener: ActorRef) exte
 
   def receive = {
     case NeuronCalculate ⇒
-      for (i ← 0 until nrOfMessages) workerRouter ! Work(i, allNeurons.next(), Seq())
+      var sampleBuffer : Seq[Seq[Float]] = Seq()
+      allTimeSamples.foreach {
+        sample: RawTimeSample =>
+          sampleBuffer = sampleBuffer :+ sample.timeSamples
+      }
+      for (i ← 0 until nrOfMessages) workerRouter ! Work(i, allNeurons.next(), sampleBuffer)
 
     case NeuronResult(value) ⇒
       averageFluorList :+ value

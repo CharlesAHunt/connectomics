@@ -74,10 +74,6 @@ object DataLoader {
 
     allTimeSamples.slice(start, chunkSize).foreach {
       sample: RawTimeSample =>
-        if(indexCheck != -1 && indexCheck+1 != sample.index) {
-          val ind = indexCheck+1
-          println("OUT OF ORDER(timesample):  should be" +ind + "  is " + sample.index)
-        }
         indexCheck = sample.index
         sampleBuffer = sampleBuffer :+ sample.timeSamples
     }
