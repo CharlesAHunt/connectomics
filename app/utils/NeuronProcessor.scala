@@ -37,7 +37,6 @@ object NeuronProcessor {
     }
 
     accumulator = accumulator / 179500
-    println("Neuron variance " + accumulator)
     accumulator
   }
 }
