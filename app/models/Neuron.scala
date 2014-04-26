@@ -9,7 +9,8 @@ case class Neuron (  _id: ObjectId = new ObjectId,
                    index: Int,
                    xPos: Float,
                    yPos: Float,
-                   timeSample: Seq[Float]
+                   mean: Float,
+                   variance: Float
                   )
 
 object NeuronDAO extends SalatDAO[Neuron, ObjectId] (

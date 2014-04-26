@@ -10,15 +10,34 @@ import models.Neuron
 
 object NeuronProcessor {
 
-  def calculateFor(neuronIndex: Int, neuron: Neuron): Float = {
+  def calcStatsForNeuron(neuronIndex: Int, neuron: Neuron):Float = {
     var accumulator: Float = 0
 
     Aggregator.samplesForNeuron(neuronIndex).foreach { sample =>
         accumulator += sample.timeSamples.head
     }
 
+    val mean = accumulator / 179500
+    val variance = calculateVariance(neuronIndex, neuron, mean)
+
+    NeuronDAO.update(MongoDBObject("_id" -> neuron._id),
+      MongoDBObject("index" -> neuron.index ,"xPos" -> neuron.xPos, "yPos" -> neuron.yPos, "mean" -> mean, "variance" -> variance), multi = false, upsert = true)
+
+    println("Neuron sample avg " + accumulator + " and variance: " + variance)
+
+    //todo: calculate standard deviation
+    variance
+  }
+
+  def calculateVariance(neuronIndex: Int, neuron: Neuron, mean : Float): Float = {
+    var accumulator: Float = 0
+
+    Aggregator.samplesForNeuron(neuronIndex).foreach { sample =>
+      accumulator += scala.math.pow(sample.timeSamples.head - mean, 2).toFloat
+    }
+
     accumulator = accumulator / 179500
-    println("Neuron ts avg " + accumulator)
+    println("Neuron variance " + accumulator)
     accumulator
   }
 }
@@ -27,7 +46,7 @@ class NeuronWorker extends Actor {
 
   def receive = {
     case Work(start, neuron) ⇒
-      sender ! NeuronResult(NeuronProcessor.calculateFor(start, neuron))
+      sender ! NeuronResult(NeuronProcessor.calcStatsForNeuron(start, neuron))
   }
 
 }
@@ -61,7 +80,6 @@ class NeuronMaster(nrOfWorkers: Int, nrOfMessages: Int, listener: ActorRef) exte
         context.stop(self)
       }
   }
-
 }
 
 class NeuronListener extends Actor {
@@ -77,4 +95,5 @@ sealed trait NeuronMessage
 case object NeuronCalculate extends NeuronMessage
 case class Work(start: Int, neuron : Neuron) extends NeuronMessage
 case class NeuronResult(value: Double) extends NeuronMessage
+case class NeuronVarianceResult(value: Double) extends NeuronMessage
 case class NeuronApproximation(numericalResult: Double, duration: Duration)

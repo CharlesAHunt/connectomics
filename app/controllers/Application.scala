@@ -39,12 +39,13 @@ object Application extends Controller with Access {
     DataLoader.loadRawTimeSampleData()
     Ok(views.html.index(loginForm, registerForm))
   }
+
   def integrate() = Action { implicit request =>
-    DataLoader.integrateRawTimeSampleData()
+    //DataLoader.integrateRawTimeSampleData()
     Ok(views.html.index(loginForm, registerForm))
   }
+
   def crunch() = Action { implicit request =>
-    println(Aggregator.samplesForNeuron(0))
     Ok(views.html.index(loginForm, registerForm))
   }
   def view() = Action { implicit request =>
