@@ -4,25 +4,22 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits._
-import models.{RawTimeSample, RawTimeSampleDAO, Neuron, NeuronDAO}
+import models._
 import com.mongodb.casbah.Imports._
-import com.novus.salat.dao.SalatMongoCursor
+import models.Neuron
 
 object NeuronProcessor {
 
-  def calculateFor(neuronIndex: Int, neuron : Neuron): Float = {
-    var accumulator : Float = 0
+  def calculateFor(neuronIndex: Int, neuron: Neuron): Float = {
+    var accumulator: Float = 0
 
-    RawTimeSampleDAO.find(ref = MongoDBObject()).foreach { sample =>
-      accumulator += sample.timeSamples(neuronIndex)
+    Aggregator.samplesForNeuron(neuronIndex).foreach { sample =>
+        accumulator += sample.timeSamples.head
     }
 
-    accumulator = accumulator/RawTimeSampleDAO.find(ref = MongoDBObject()).size
-
-    println("calced neuron " + accumulator)
-
+    accumulator = accumulator / 179500
+    println("Neuron ts avg " + accumulator)
     accumulator
-
   }
 }
 

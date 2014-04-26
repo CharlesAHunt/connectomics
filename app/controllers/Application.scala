@@ -44,7 +44,7 @@ object Application extends Controller with Access {
     Ok(views.html.index(loginForm, registerForm))
   }
   def crunch() = Action { implicit request =>
-  //todo cruncher
+    println(Aggregator.samplesForNeuron(0))
     Ok(views.html.index(loginForm, registerForm))
   }
   def view() = Action { implicit request =>

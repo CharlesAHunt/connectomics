@@ -6,7 +6,6 @@ import com.novus.salat._
 import com.novus.salat.annotations._
 import com.novus.salat.global._
 import models.{RawTimeSampleDAO, RawTimeSample, NeuronDAO, Neuron}
-import com.novus.salat.dao.SalatMongoCursor
 
 object DataLoader {
 
@@ -70,30 +69,15 @@ object DataLoader {
     val allNeurons = NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1))
     val allTimeSamples = RawTimeSampleDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1))
     var sampleBuffer: Seq[Seq[Float]] = Seq()
-    var indexCheck = -1
-
     allTimeSamples.slice(start, chunkSize).foreach {
       sample: RawTimeSample =>
-        indexCheck = sample.index
         sampleBuffer = sampleBuffer :+ sample.timeSamples
     }
-
-    if (sampleBuffer.isEmpty)
-      false
-
-    indexCheck = -1
-
+    if (sampleBuffer.isEmpty) false
     allNeurons.foreach {
       neuron =>
         var nextBuffer: Seq[Seq[Float]] = Seq()
         var currentList: Seq[Float] = Seq()
-
-        if(indexCheck != -1 && indexCheck+1 != neuron.index) {
-          val ind = indexCheck+1
-          println("OUT OF ORDER(neuron):  should be" + ind + "  is " + neuron.index)
-        }
-        indexCheck = neuron.index
-
         sampleBuffer.foreach {
           sample: Seq[Float] =>
             if (!sample.isEmpty) {
@@ -101,13 +85,10 @@ object DataLoader {
               nextBuffer = nextBuffer :+ sample.tail
             }
         }
-
-        if (currentList.isEmpty)
-          false
+        if (currentList.isEmpty) false
         else {
           NeuronDAO.update(MongoDBObject("_id" -> neuron._id),
             MongoDBObject("timeSample" -> neuron.timeSample.++(currentList), "index" -> neuron.index ,"xPos" -> neuron.xPos, "yPos" -> neuron.yPos), multi = false, upsert = true)
-
           sampleBuffer = nextBuffer
         }
     }
