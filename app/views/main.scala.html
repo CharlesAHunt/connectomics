@@ -7,12 +7,8 @@
     <title>Connectomics</title>
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/bootstrap.min.css")'>
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/main.css")'>
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/datepicker.css")'>
     <link rel="shortcut icon" type="image/png" href='@routes.Assets.at("images/neuron.png")'>
     <script src='@routes.Assets.at("javascripts/jquery-1.9.0.min.js")' type='text/javascript'></script>
-    <script src='@routes.Assets.at("javascripts/Chart.min.js")' type='text/javascript'></script>
-    <script src='@routes.Assets.at("javascripts/angular.min.js")' type="text/javascript"></script>
-    <script src='@routes.Assets.at("javascripts/logic-app.js")' type="text/javascript"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 
@@ -50,6 +46,8 @@
 
         <div id="LogicController" ng-controller="LogicController">
 
+            <div id="demo"> </div>
+
             @content
 
         </div>
@@ -69,6 +67,37 @@
 <script type="text/javascript">
     var path = window.location.pathname.replace("/","").replace("#","");
     $("#"+path).addClass("active");
+
+    JSONData = [
+        { "id": 3, "position": "4", "amount": 12000},
+        { "id": 1, "position": "6", "amount": 2000},
+        { "id": 2, "position": "7", "amount": 17000},
+        { "id": 4, "position": "2", "amount": 15000},
+        { "id": 5, "position": "1", "amount": 16000}
+    ];
+    (function() {
+        var data = JSONData.slice();
+        var amountFn = function(d) { return d.amount };
+        var positionFn = function(d) { return d.position };
+
+        var x = d3.time.scale()
+                .range([10, 280])
+                .domain(d3.extent(data, positionFn));
+
+        var y = d3.scale.linear()
+                .range([180, 10])
+                .domain(d3.extent(data, amountFn));
+
+        var svg = d3.select("#demo").append("svg:svg")
+                .attr("width", 300)
+                .attr("height", 200);
+
+        svg.selectAll("circle").data(data).enter()
+                .append("svg:circle")
+                .attr("r", 4)
+                .attr("cx", function(d) { return x(positionFn(d)) })
+                .attr("cy", function(d) { return y(amountFn(d)) })
+    })();
 </script>
 
 
