@@ -15,8 +15,8 @@ app.controller('ConnectController', function ($scope, $http) {
 
                 (function() {
                     var data = JSONData.slice();
-                    var amountFn = function(d) { return d.xPos };
-                    var positionFn = function(d) { return d.yPos };
+                    var xPos = function(d) { return d.xPos };
+                    var yPos = function(d) { return d.yPos };
 
                     var x = d3.time.scale()
                         .range([10, 280])
@@ -33,8 +33,8 @@ app.controller('ConnectController', function ($scope, $http) {
                     svg.selectAll("circle").data(data).enter()
                         .append("svg:circle")
                         .attr("r", 4)
-                        .attr("cx", function(d) { return x(positionFn(d)) })
-                        .attr("cy", function(d) { return y(amountFn(d)) })
+                        .attr("cx", function(d) { return x(yPos(d)) })
+                        .attr("cy", function(d) { return y(xPos(d)) })
                 })();
 
             })
