@@ -4,6 +4,8 @@ import play.api.mvc._
 import akka.actor.{Props, ActorSystem}
 import utils._
 import utils.{NeuronMaster, NeuronListener, NeuronCalculate}
+import models.NeuronDAO
+import com.mongodb.casbah.commons.MongoDBObject
 
 object Application extends Controller with Access {
 
@@ -48,6 +50,16 @@ object Application extends Controller with Access {
   def crunch() = Action { implicit request =>
     Ok(views.html.index(loginForm, registerForm))
   }
+
+  def positions(end: Int) = Action {
+    val jsonBuilder = StringBuilder.newBuilder
+    jsonBuilder.append("[")
+    getCollection("neurons").find().foreach( jsonBuilder.append(_).append(",") )
+    jsonBuilder.deleteCharAt(jsonBuilder.length-1)
+    jsonBuilder.append("]")
+    Ok(jsonBuilder.toString())
+  }
+
   def view() = Action { implicit request =>
   //todo maybe just redirect to a view screen
     Ok(views.html.index(loginForm, registerForm))
