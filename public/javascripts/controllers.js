@@ -20,11 +20,11 @@ app.controller('ConnectController', function ($scope, $http) {
 
                     var x = d3.time.scale()
                         .range([10, 280])
-                        .domain(d3.extent(data, positionFn));
+                        .domain(d3.extent(data, yPos));
 
                     var y = d3.scale.linear()
                         .range([180, 10])
-                        .domain(d3.extent(data, amountFn));
+                        .domain(d3.extent(data, xPos));
 
                     var svg = d3.select("#demo").append("svg:svg")
                         .attr("width", 300)
