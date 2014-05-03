@@ -5,7 +5,12 @@ import com.mongodb.casbah.Imports._
 
 object Aggregator {
 
-  //This is not technically aggregation.  Unfortunately, MongoDB does not yet support $slice in the aggregation pipeline.
+
+}
+
+object Finder {
+
+  //Unfortunately, MongoDB does not yet support $slice in the aggregation pipeline.
   def samplesForNeuron(neuronIndex: Int) =
     RawTimeSampleDAO.find( MongoDBObject(),MongoDBObject("timeSamples" -> MongoDBObject("$slice" -> MongoDBList(neuronIndex, 1))))
 

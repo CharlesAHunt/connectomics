@@ -26,15 +26,15 @@ app.controller('ConnectController', function ($scope, $http) {
                         .range([180, 10])
                         .domain(d3.extent(data, xPos));
 
-                    var svg = d3.select("#demo").append("svg:svg")
+                    var svg = d3.select("#graph").append("svg:svg")
                         .attr("width", 300)
                         .attr("height", 200);
 
                     svg.selectAll("circle").data(data).enter()
                         .append("svg:circle")
                         .attr("r", 4)
-                        .attr("cx", function(d) { return x(yPos(d)) })
-                        .attr("cy", function(d) { return y(xPos(d)) })
+                        .attr("cx", function(d) { return x(xPos(d)) })
+                        .attr("cy", function(d) { return y(yPos(d)) })
                 })();
 
             })

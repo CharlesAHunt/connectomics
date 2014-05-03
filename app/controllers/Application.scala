@@ -31,7 +31,6 @@ object Application extends Controller with Access {
 
   }
 
-
   def loadNeurons() = Action { implicit request =>
     DataLoader.loadData()
     Ok(views.html.index(loginForm, registerForm))
@@ -48,6 +47,7 @@ object Application extends Controller with Access {
   }
 
   def crunch() = Action { implicit request =>
+    Statistics.calcRegression()
     Ok(views.html.index(loginForm, registerForm))
   }
 
