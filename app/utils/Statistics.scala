@@ -39,18 +39,16 @@ object Statistics {
     var yPosArr : Array[Double] = Array()
     var fluorArr : Array[Double] = Array()
 
-    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).foreach { n =>
+    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(10).foreach { n =>
       xPosArr = xPosArr :+ n.xPos.toDouble
       yPosArr = yPosArr :+ n.yPos.toDouble
-    }
-
-    RawTimeSampleDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).foreach { ts =>
-      fluorArr = fluorArr :+ ts.timeSamples(0).toDouble //todo figure this shit out
+      Finder.samplesForNeuron(n.index).foreach { ts =>
+        fluorArr = fluorArr :+ ts.timeSamples.head.toDouble
+      }
     }
 
     val neuronMatrix = DenseMatrix(xPosArr,yPosArr)
     val fluorescenceMatrix = DenseMatrix(Array[Double](),Array[Double]())
-
 
     val result1 : breeze.linalg.DenseMatrix[Double] = inv(neuronMatrix :* neuronMatrix.t)
 
