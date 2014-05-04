@@ -12,7 +12,7 @@ class RegressionWorker extends Actor {
 
   def receive = {
     case RegressionWork(start, neuron) ⇒
-      Statistics.calcRegression(start, neuron)
+      Statistics.calcRegression()
       sender ! RegressionResult()
   }
 
