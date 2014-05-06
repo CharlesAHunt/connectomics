@@ -33,13 +33,13 @@ object Statistics {
     accumulator
   }
 
-  def calcRegression() = {
-
+  def calcRegression():Seq[Double] = {
+    var correlationCoefficients : Seq[Double] = Seq()
     var xPosArr : Array[Double] = Array[Double]()
     var yPosArr : Array[Double] = Array()
     var fluorArr : Array[Double] = Array()
 
-    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(5).foreach { n =>
+    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(10).foreach { n =>
       println("loading neuron into array")
       xPosArr = xPosArr :+ n.xPos.toDouble
       yPosArr = yPosArr :+ n.yPos.toDouble
@@ -49,16 +49,18 @@ object Statistics {
     }
 
     println("done loading....now matrix ops")
+
     val neuronMatrix = DenseMatrix(xPosArr,yPosArr)
-    println("created neuron matrix")
-    val fluorescenceMatrix = new DenseMatrix(179500,5,fluorArr)
-    println("created fluor matrix")
     val result1 : breeze.linalg.DenseMatrix[Double] = inv(neuronMatrix :* neuronMatrix.t)
-    println("got result 1")
-    val result2 = result1 :* neuronMatrix.t
-    println("got result 2")
-    val leastSquaresEstimates = result2 :* fluorescenceMatrix
-    println("Least Squares Estimates" + leastSquaresEstimates.toString)
+    val leastSquaresEstimates = (result1 :* neuronMatrix.t) :* new DenseMatrix(179500,10,fluorArr)
+
+    leastSquaresEstimates.forall{(a:(Int,Int), b:Double) =>
+      println("a1: "+a._1+"       a2: "+a._2+"       b: "+b)
+      correlationCoefficients = correlationCoefficients :+ b
+      true
+    }
+
+    correlationCoefficients
   }
 
 }

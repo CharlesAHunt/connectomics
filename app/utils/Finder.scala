@@ -3,11 +3,6 @@ package utils
 import models.RawTimeSampleDAO
 import com.mongodb.casbah.Imports._
 
-object Aggregator {
-
-
-}
-
 object Finder {
 
   //Unfortunately, MongoDB does not yet support $slice in the aggregation pipeline.
