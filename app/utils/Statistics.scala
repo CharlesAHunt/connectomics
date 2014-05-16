@@ -1,6 +1,6 @@
 package utils
 
-import models.{RawTimeSampleDAO, RawTimeSample, NeuronDAO, Neuron}
+import models.{ NeuronDAO, Neuron}
 import com.mongodb.casbah.Imports._
 import breeze.linalg._
 

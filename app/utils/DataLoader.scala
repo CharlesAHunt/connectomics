@@ -13,7 +13,7 @@ object DataLoader {
 
     if (NeuronDAO.collection.size == 0) {
       val positionsIterator = Source.fromFile("public\\connectdata\\test\\networkPositions_test.txt").getLines()
-      val zippedPositions: scala.collection.Iterator[scala.Tuple2[String, scala.Int]] = positionsIterator.zipWithIndex
+      val zippedPositions: scala.collection.Iterator[(String, scala.Int)] = positionsIterator.zipWithIndex
 
       zippedPositions.foreach {
         position =>
@@ -32,7 +32,7 @@ object DataLoader {
   def loadRawTimeSampleData() = {
     println("Preparing to load raw time sample data...")
     val timeSeriesIterator = Source.fromFile("public\\connectdata\\test\\fluorescence_test.txt").getLines()
-    val zippedTimeSeries: scala.collection.Iterator[Tuple2[String, Int]] = timeSeriesIterator.zipWithIndex
+    val zippedTimeSeries: scala.collection.Iterator[(String, Int)] = timeSeriesIterator.zipWithIndex
 
     zippedTimeSeries.foreach {
       timeSeriesLine =>
