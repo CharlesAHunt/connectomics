@@ -14,6 +14,37 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 
+<style>
+
+    body {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+    }
+
+    .reg {
+        fill: none;
+        stroke: orange;
+        stroke-width: 1.5px;
+    }
+
+</style>
+
 <body ng-app="connectApp" ng-controller="ConnectController" style="background-color: #999999">
     <div class="container">
         <nav class="navbar navbar-inverse" role="navigation" style="background-color: #D9D4EF">

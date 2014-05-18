@@ -6,6 +6,8 @@ import breeze.linalg._
 
 object Statistics {
 
+  val timeSlices = 179500
+
   def calcStatsForNeuron(neuronIndex: Int, neuron: Neuron)= {
     var accumulator: Float = 0
 
@@ -13,7 +15,7 @@ object Statistics {
       accumulator += sample.timeSamples.head
     }
 
-    val mean = accumulator / 179500
+    val mean = accumulator / timeSlices
     val variance = calculateVariance(neuronIndex, neuron, mean)
 
     NeuronDAO.update(MongoDBObject("_id" -> neuron._id),
@@ -29,7 +31,7 @@ object Statistics {
       accumulator += scala.math.pow(sample.timeSamples.head - mean, 2).toFloat
     }
 
-    accumulator = accumulator / 179500
+    accumulator = accumulator / timeSlices
     accumulator
   }
 
@@ -39,7 +41,7 @@ object Statistics {
     var yPosArr : Array[Double] = Array()
     var fluorArr : Array[Double] = Array()
 
-    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(10).foreach { n =>
+    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(2).foreach { n =>
       println("loading neuron into array")
       xPosArr = xPosArr :+ n.xPos.toDouble
       yPosArr = yPosArr :+ n.yPos.toDouble
@@ -54,7 +56,7 @@ object Statistics {
     val result1 : breeze.linalg.DenseMatrix[Double] = inv(neuronMatrix :* neuronMatrix.t)
     val leastSquaresEstimates = (result1 :* neuronMatrix.t) :* new DenseMatrix(179500,10,fluorArr)
 
-    leastSquaresEstimates.forall{(a:(Int,Int), b:Double) =>
+    leastSquaresEstimates.forall { (a:(Int,Int), b:Double) =>
       println("a1: "+a._1+"       a2: "+a._2+"       b: "+b)
       correlationCoefficients = correlationCoefficients :+ b
       true
