@@ -10,8 +10,8 @@ app.controller('ConnectController', function ($scope, $http) {
         $http.get('positions/' + numberofNeuronsToGet)
             .success(function (data) {
                 $scope.neurons = data;
-
-                JSONData = $scope.neurons;
+                $("#graph").html("");
+                var JSONData = $scope.neurons;
 
                 (function() {
                     var data = JSONData.slice();
@@ -74,20 +74,13 @@ app.controller('ConnectController', function ($scope, $http) {
     };
 
     $scope.getRegression = function() {
-        $http.get('regression/')
-            .success(function (data) {
-                $scope.coeffs = data;
 
-                JSONData = $scope.coeffs;
+                $("#linechart").html("");
 
                 (function() {
-                    var data = JSONData.slice();
-
                     var margin = {top: 20, right: 20, bottom: 30, left: 50},
                         width = 960 - margin.left - margin.right,
                         height = 500 - margin.top - margin.bottom;
-
-                    var parseDate = d3.time.format("%d-%b-%y").parse;
 
                     var x = d3.time.scale()
                         .range([0, width]);
@@ -107,33 +100,20 @@ app.controller('ConnectController', function ($scope, $http) {
                         .x(function(d) { return x(d.date); })
                         .y(function(d) { return y(d.close); });
 
-                    var svg = d3.select("body").append("svg")
+                    var svg = d3.select("#linechart").append("svg")
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                    d3.tsv("data.tsv", function(error, data) {
+                    d3.json("/regression", function(error, data) {
                         data.forEach(function(d) {
-                            d.date = parseDate(d.date);
+                            d.date = d.date;
                             d.close = +d.close;
                         });
 
                         x.domain(d3.extent(data, function(d) { return d.date; }));
                         y.domain(d3.extent(data, function(d) { return d.close; }));
-
-                        // Derive a linear regression
-                        var lin = ss.linear_regression().data(data.map(function(d) {
-                            return [+d.date, d.close];
-                        })).line();
-
-                        // Create a line based on the beginning and endpoints of the range
-                        var lindata = x.domain().map(function(x) {
-                            return {
-                                date: new Date(x),
-                                close: lin(+x)
-                            };
-                        });
 
                         svg.append("g")
                             .attr("class", "x axis")
@@ -148,26 +128,14 @@ app.controller('ConnectController', function ($scope, $http) {
                             .attr("y", 6)
                             .attr("dy", ".71em")
                             .style("text-anchor", "end")
-                            .text("Price ($)");
+                            .text("Fluorescence");
 
                         svg.append("path")
                             .datum(data)
                             .attr("class", "line")
                             .attr("d", line);
-
-                        svg.append("path")
-                            .datum(lindata)
-                            .attr("class", "reg")
-                            .attr("d", line);
                     });
-
-
                 })();
-
-            })
-            .error(function (data, status, headers, config) {
-
-            });
     };
 
 });

@@ -17,6 +17,7 @@ GET         /crunch                 controllers.Application.crunch()
 GET         /view                   controllers.Application.view()
 
 GET         /positions/:end         controllers.Application.positions(end: Int)
+GET         /regression             controllers.Application.regression()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

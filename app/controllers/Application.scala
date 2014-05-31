@@ -60,6 +60,12 @@ object Application extends Controller with Access {
     Ok(jsonBuilder.toString())
   }
 
+  def regression() = Action {
+    val jsonBuilder = StringBuilder.newBuilder
+    jsonBuilder.append("""[{"date":"1","close": 2.13},{"date":"2","close": 3.98},{"date":"3","close": 3.00},{"date":"4","close": 7.70}]""")
+    Ok(jsonBuilder.toString())
+  }
+
   def view() = Action { implicit request =>
   //todo maybe just redirect to a view screen
     Ok(views.html.index(loginForm, registerForm))
