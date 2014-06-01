@@ -26,7 +26,7 @@ app.controller('ConnectController', function ($scope, $http) {
                         .range([380, 10])
                         .domain(d3.extent(data, xPos));
 
-                    var svg = d3.select("#graph").append("svg")
+                    var svg = d3.select("#scatterplot").append("svg")
                         .attr("width", 600)
                         .attr("height", 400);
 
