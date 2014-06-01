@@ -4,7 +4,7 @@ import play.api.mvc._
 import akka.actor.{Props, ActorSystem}
 import utils._
 import utils.{NeuronMaster, NeuronListener, NeuronCalculate}
-import models.NeuronDAO
+import models.{RegressionHistory, RegressionHistoryDAO, NeuronDAO}
 import com.mongodb.casbah.commons.MongoDBObject
 
 object Application extends Controller with Access {
@@ -62,7 +62,19 @@ object Application extends Controller with Access {
 
   def regression() = Action {
     val jsonBuilder = StringBuilder.newBuilder
-    jsonBuilder.append("""[{"date":"1","close": 2.13},{"date":"2","close": 3.98},{"date":"3","close": 3.00},{"date":"4","close": 7.70}]""")
+    jsonBuilder.append("[")
+    val latestRegressionHistory: RegressionHistory = RegressionHistoryDAO.find(ref = MongoDBObject()).next()
+
+    (0 until 100).foreach { x=>
+      var fluor : Double = 0
+      latestRegressionHistory.coefficients.foreach { y =>
+        fluor = fluor + x*y
+      }
+      jsonBuilder.append("""{"pos":" """+x+""" ","fluor": " """+fluor+""" "},""")
+    }
+
+    jsonBuilder.deleteCharAt(jsonBuilder.length-1)
+    jsonBuilder.append("]")
     Ok(jsonBuilder.toString())
   }
 

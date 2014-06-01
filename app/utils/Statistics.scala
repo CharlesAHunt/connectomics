@@ -1,14 +1,16 @@
 package utils
 
-import models.{ NeuronDAO, Neuron}
+import models._
 import com.mongodb.casbah.Imports._
 import breeze.linalg._
+import models.Neuron
+import java.util.Date
 
 object Statistics {
 
   val timeSlices = 179500
 
-  def calcStatsForNeuron(neuronIndex: Int, neuron: Neuron)= {
+  def calcStatsForNeuron(neuronIndex: Int, neuron: Neuron) = {
     var accumulator: Float = 0
 
     Finder.samplesForNeuron(neuronIndex).foreach { sample =>
@@ -35,13 +37,14 @@ object Statistics {
     accumulator
   }
 
-  def calcRegression():Seq[Double] = {
+  def calcRegression() : Seq[Double] = {
+    val numberOfNeurons : Int = 2
     var correlationCoefficients : Seq[Double] = Seq()
     var xPosArr : Array[Double] = Array[Double]()
     var yPosArr : Array[Double] = Array()
     var fluorArr : Array[Double] = Array()
 
-    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(2).foreach { n =>
+    NeuronDAO.find(ref = MongoDBObject()).sort(orderBy = MongoDBObject("index" -> 1)).limit(numberOfNeurons).foreach { n =>
       println("loading neuron into array")
       xPosArr = xPosArr :+ n.xPos.toDouble
       yPosArr = yPosArr :+ n.yPos.toDouble
@@ -53,8 +56,8 @@ object Statistics {
     println("done loading....now matrix ops")
 
     val neuronMatrix = DenseMatrix(xPosArr,yPosArr)
-    val result1 : breeze.linalg.DenseMatrix[Double] = inv(neuronMatrix :* neuronMatrix.t)
-    val leastSquaresEstimates = (result1 :* neuronMatrix.t) :* new DenseMatrix(179500,10,fluorArr)
+    val result1 : breeze.linalg.DenseMatrix[Double] = inv(neuronMatrix.t :* neuronMatrix )
+    val leastSquaresEstimates = (result1 :* neuronMatrix.t) :* new DenseMatrix(179500,numberOfNeurons,fluorArr)
 
     leastSquaresEstimates.forall { (a:(Int,Int), b:Double) =>
       println("a1: "+a._1+"       a2: "+a._2+"       b: "+b)
@@ -62,6 +65,9 @@ object Statistics {
       true
     }
 
+    val regressionHistory = RegressionHistory(coefficients = correlationCoefficients, timeGenerated = new Date().toString, regressionType = "MultipleLinear")
+    RegressionHistoryDAO.insert(regressionHistory)
+    println("regression history inserted")
     correlationCoefficients
   }
 

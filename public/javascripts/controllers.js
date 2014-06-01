@@ -82,7 +82,7 @@ app.controller('ConnectController', function ($scope, $http) {
                         width = 960 - margin.left - margin.right,
                         height = 500 - margin.top - margin.bottom;
 
-                    var x = d3.time.scale()
+                    var x = d3.scale.linear()
                         .range([0, width]);
 
                     var y = d3.scale.linear()
@@ -97,8 +97,8 @@ app.controller('ConnectController', function ($scope, $http) {
                         .orient("left");
 
                     var line = d3.svg.line()
-                        .x(function(d) { return x(d.date); })
-                        .y(function(d) { return y(d.close); });
+                        .x(function(d) { return x(d.pos); })
+                        .y(function(d) { return y(d.fluor); });
 
                     var svg = d3.select("#linechart").append("svg")
                         .attr("width", width + margin.left + margin.right)
@@ -108,17 +108,22 @@ app.controller('ConnectController', function ($scope, $http) {
 
                     d3.json("/regression", function(error, data) {
                         data.forEach(function(d) {
-                            d.date = d.date;
-                            d.close = +d.close;
+                            d.pos = d.pos;
+                            d.fluor = +d.fluor;
                         });
 
-                        x.domain(d3.extent(data, function(d) { return d.date; }));
-                        y.domain(d3.extent(data, function(d) { return d.close; }));
+                        x.domain(d3.extent(data, function(d) { return d.pos; }));
+                        y.domain(d3.extent(data, function(d) { return d.fluor; }));
 
                         svg.append("g")
                             .attr("class", "x axis")
                             .attr("transform", "translate(0," + height + ")")
-                            .call(xAxis);
+                            .call(xAxis)
+                            .append("text")
+                            .attr("x", 600)
+                            .attr("y", -6)
+                            .style("text-anchor", "end")
+                            .text("Fluorescence");
 
                         svg.append("g")
                             .attr("class", "y axis")
@@ -128,7 +133,7 @@ app.controller('ConnectController', function ($scope, $http) {
                             .attr("y", 6)
                             .attr("dy", ".71em")
                             .style("text-anchor", "end")
-                            .text("Fluorescence");
+                            .text("Position");
 
                         svg.append("path")
                             .datum(data)
