@@ -7,7 +7,7 @@ object Finder {
 
   //Unfortunately, MongoDB does not yet support $slice in the aggregation pipeline.
   def samplesForNeuron(neuronIndex: Int) =
-    RawTimeSampleDAO.find( MongoDBObject(),MongoDBObject("timeSamples" -> MongoDBObject("$slice" -> MongoDBList(neuronIndex, 1))))
+    RawTimeSampleDAO.find( MongoDBObject(), MongoDBObject("timeSamples" -> MongoDBObject("$slice" -> MongoDBList(neuronIndex, 1))))
 
 }
 

@@ -11,34 +11,35 @@ object Statistics {
   val timeSlices = 179500
 
   def calcStatsForNeuron(neuronIndex: Int, neuron: Neuron) = {
+    val mean = calcMean(neuronIndex)
+    val variance = calculateVariance(neuronIndex, mean)
+
+    NeuronDAO.update(MongoDBObject("_id" -> neuron._id),
+      MongoDBObject("index" -> neuron.index ,"xPos" -> neuron.xPos, "yPos" -> neuron.yPos, "mean" -> mean, "variance" -> variance), multi = false, upsert = true)
+  }
+
+  def calcMean(neuronIndex: Int) = {
     var accumulator: Float = 0
 
     Finder.samplesForNeuron(neuronIndex).foreach { sample =>
       accumulator += sample.timeSamples.head
     }
 
-    val mean = accumulator / timeSlices
-    val variance = calculateVariance(neuronIndex, neuron, mean)
-
-    NeuronDAO.update(MongoDBObject("_id" -> neuron._id),
-      MongoDBObject("index" -> neuron.index ,"xPos" -> neuron.xPos, "yPos" -> neuron.yPos, "mean" -> mean, "variance" -> variance), multi = false, upsert = true)
-
-    println("Neuron sample avg " + accumulator + " and variance: " + variance)
+    accumulator / timeSlices
   }
 
-  def calculateVariance(neuronIndex: Int, neuron: Neuron, mean : Float): Float = {
+  def calculateVariance(neuronIndex: Int, mean : Float): Float = {
     var accumulator: Float = 0
 
     Finder.samplesForNeuron(neuronIndex).foreach { sample =>
       accumulator += scala.math.pow(sample.timeSamples.head - mean, 2).toFloat
     }
 
-    accumulator = accumulator / timeSlices
-    accumulator
+    accumulator / timeSlices
   }
 
   def calcRegression() : Seq[Double] = {
-    val numberOfNeurons : Int = 2
+    val numberOfNeurons : Int = 4
     var correlationCoefficients : Seq[Double] = Seq()
     var xPosArr : Array[Double] = Array[Double]()
     var yPosArr : Array[Double] = Array()
@@ -69,6 +70,22 @@ object Statistics {
     RegressionHistoryDAO.insert(regressionHistory)
     println("regression history inserted")
     correlationCoefficients
+  }
+
+  def autoCorrelation(index : Int, lag: Int) : Double = {
+    var fluorArr : Seq[Float] = Seq()
+
+    val neuron : Neuron = NeuronDAO.findOne(DBObject("index"->index)).get
+      Finder.samplesForNeuron(index).foreach { ts =>
+        fluorArr = fluorArr :+ ts.timeSamples.head
+      }
+
+    val mean = neuron.mean
+    val zippedFluor = fluorArr.zipWithIndex
+    val numer = zippedFluor.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) => acc + ( if(zip+lag>=fluorArr.size) 0 else (curr - mean)*(fluorArr(zip+lag) - mean))}
+    val denom = zippedFluor.foldLeft(0f){case (acc, (curr:Float, zip:Int)) =>  math.pow(curr - mean,2).toFloat}
+
+    numer/denom
   }
 
 }
