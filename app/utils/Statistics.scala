@@ -76,14 +76,40 @@ object Statistics {
     var fluorArr : Seq[Float] = Seq()
 
     val neuron : Neuron = NeuronDAO.findOne(DBObject("index"->index)).get
-      Finder.samplesForNeuron(index).foreach { ts =>
+      Finder.samplesForNeuron(index).foreach { ts:RawTimeSample =>
         fluorArr = fluorArr :+ ts.timeSamples.head
       }
 
     val mean = neuron.mean
     val zippedFluor = fluorArr.zipWithIndex
     val numer = zippedFluor.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) => acc + ( if(zip+lag>=fluorArr.size) 0 else (curr - mean)*(fluorArr(zip+lag) - mean))}
-    val denom = zippedFluor.foldLeft(0f){case (acc, (curr:Float, zip:Int)) =>  math.pow(curr - mean,2).toFloat}
+    val denom = zippedFluor.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) =>  math.pow(curr - mean,2).toFloat}
+
+    numer/denom
+  }
+
+  def crossCorrelation(index : Int, index2 : Int, lag: Int) : Double = {
+    var fluorArr1 : Seq[Float] = Seq()
+    var fluorArr2 : Seq[Float] = Seq()
+
+    val neuron1 : Neuron = NeuronDAO.findOne(DBObject("index"->index)).get
+    Finder.samplesForNeuron(index).foreach { ts:RawTimeSample =>
+      fluorArr1 = fluorArr1 :+ ts.timeSamples.head
+    }
+
+    val neuron2 : Neuron = NeuronDAO.findOne(DBObject("index"->index)).get
+    Finder.samplesForNeuron(index).foreach { ts:RawTimeSample =>
+      fluorArr2 = fluorArr1 :+ ts.timeSamples.head
+    }
+
+    val mean1 = neuron1.mean
+    val mean2 = neuron2.mean
+    val zippedFluor1 = fluorArr1.zipWithIndex
+    val zippedFluor2 = fluorArr2.zipWithIndex
+
+    //todo fix these for cross correlation
+    val numer = zippedFluor1.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) => acc + ( if(zip+lag>=fluorArr1.size) 0 else (curr - mean1)*(fluorArr1(zip+lag) - mean1))}
+    val denom = zippedFluor1.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) =>  math.pow(curr - mea1n,2).toFloat}
 
     numer/denom
   }
