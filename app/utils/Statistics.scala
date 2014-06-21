@@ -105,11 +105,9 @@ object Statistics {
     val mean1 = neuron1.mean
     val mean2 = neuron2.mean
     val zippedFluor1 = fluorArr1.zipWithIndex
-    val zippedFluor2 = fluorArr2.zipWithIndex
 
-    //todo fix these for cross correlation
-    val numer = zippedFluor1.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) => acc + ( if(zip+lag>=fluorArr1.size) 0 else (curr - mean1)*(fluorArr1(zip+lag) - mean1))}
-    val denom = zippedFluor1.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) =>  math.pow(curr - mea1n,2).toFloat}
+    val numer = zippedFluor1.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) => acc + ( if(zip+lag>=fluorArr1.size) 0 else (curr - mean1)*(fluorArr2(zip+lag) - mean2))}
+    val denom = zippedFluor1.foldLeft(0f){ case (acc, (curr:Float, zip:Int)) => math.sqrt(math.pow(curr - mean1,2)).toFloat * math.sqrt(math.pow(fluorArr2(zip+lag) - mean2,2)).toFloat}
 
     numer/denom
   }
